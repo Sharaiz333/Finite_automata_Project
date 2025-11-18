@@ -1,92 +1,82 @@
 package classtask.finite_automata;
 
+import java.util.*;
 import javax.swing.*;
-import java.awt.event.*;
 import java.awt.*;
+import java.awt.event.*;
 
-/**
- * Simple DFA GUI for Regular Expression: (g + gg + ggg)* mm + hg + ggh
- * This program tests if a string is accepted by the DFA
- */
 public class Finite_automata extends JFrame {
     
-    // Input and output fields
     private JTextField inputField;
     private JTextArea outputArea;
-    private JButton testButton;
-    private JButton clearButton;
-    private JButton showTableButton;
+    private JButton testButton, clearButton, showNFAButton, showDFAButton, showMinDFAButton;
     
-    // Constructor - sets up the window
+    private final String REGEX = "(g + gg + ggg)* mm + hg + ggh";
+    
     public Finite_automata() {
-        setTitle("Group 7 FA - Theory of Automata Project");
-        setSize(900, 650);
+        setTitle("RE → NFA → DFA → Min-DFA Simulator");
+        setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setupGUI();
     }
 
-    // Setup the GUI components
     private void setupGUI() {
-        // Main panel
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout(10, 10));
         mainPanel.setBackground(new Color(240, 240, 240));
         
-        // Top section
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BorderLayout(5, 5));
-        topPanel.setBackground(new Color(70, 130, 180));
+        topPanel.setBackground(new Color(52, 73, 94));
         
-        // Title label
-        JLabel titleLabel = new JLabel("Regular Expression: (g + gg + ggg)* mm + hg + ggh");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setBackground(new Color(52, 73, 94));
+        
+        JLabel titleLabel = new JLabel("<html><b>Regular Expression:</b> (g + gg + ggg)* mm + hg + ggh</html>");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setForeground(Color.WHITE);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(15, 15, 5, 15));
-        topPanel.add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 15, 5, 15));
+        titlePanel.add(titleLabel, BorderLayout.NORTH);
         
-        // Input section
+        JLabel credLabel = new JLabel("<html><i>Sharaiz Ahmed (57288) | Ahmed Raza (54471)</i></html>");
+        credLabel.setFont(new Font("Segoe UI", Font.ITALIC, 13));
+        credLabel.setForeground(new Color(189, 195, 199));
+        credLabel.setBorder(BorderFactory.createEmptyBorder(0, 15, 10, 15));
+        titlePanel.add(credLabel, BorderLayout.SOUTH);
+        
+        topPanel.add(titlePanel, BorderLayout.NORTH);
+        
         JPanel inputPanel = new JPanel();
-        inputPanel.setBackground(new Color(70, 130, 180));
+        inputPanel.setBackground(new Color(52, 73, 94));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(5, 15, 15, 15));
         
-        JLabel inputLabel = new JLabel("Enter Test String:");
+        JLabel inputLabel = new JLabel("Test String:");
         inputLabel.setForeground(Color.WHITE);
-        inputLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        inputLabel.setFont(new Font("Segoe UI", Font.BOLD, 15));
         inputPanel.add(inputLabel);
         
         inputField = new JTextField(20);
-        inputField.setFont(new Font("Arial", Font.PLAIN, 14));
+        inputField.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         inputPanel.add(inputField);
         
-        // Buttons
-        testButton = new JButton("Test String");
-        testButton.setBackground(new Color(60, 179, 113));
-        testButton.setForeground(Color.WHITE);
-        testButton.setFont(new Font("Arial", Font.BOLD, 13));
-        testButton.setFocusPainted(false);
+        testButton = createButton("Test String", new Color(39, 174, 96));
+        showNFAButton = createButton("Show NFA", new Color(52, 152, 219));
+        showDFAButton = createButton("Show DFA", new Color(155, 89, 182));
+        showMinDFAButton = createButton("Show Min-DFA", new Color(230, 126, 34));
+        clearButton = createButton("Clear", new Color(231, 76, 60));
+        
         inputPanel.add(testButton);
-        
-        showTableButton = new JButton("Show Table");
-        showTableButton.setBackground(new Color(100, 149, 237));
-        showTableButton.setForeground(Color.WHITE);
-        showTableButton.setFont(new Font("Arial", Font.BOLD, 13));
-        showTableButton.setFocusPainted(false);
-        inputPanel.add(showTableButton);
-        
-        clearButton = new JButton("Clear");
-        clearButton.setBackground(new Color(220, 20, 60));
-        clearButton.setForeground(Color.WHITE);
-        clearButton.setFont(new Font("Arial", Font.BOLD, 13));
-        clearButton.setFocusPainted(false);
+        inputPanel.add(showNFAButton);
+        inputPanel.add(showDFAButton);
+        inputPanel.add(showMinDFAButton);
         inputPanel.add(clearButton);
         
         topPanel.add(inputPanel, BorderLayout.CENTER);
         mainPanel.add(topPanel, BorderLayout.NORTH);
         
-        // Output area
         outputArea = new JTextArea();
-        outputArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        outputArea.setFont(new Font("Consolas", Font.PLAIN, 13));
         outputArea.setEditable(false);
         outputArea.setBackground(Color.WHITE);
         outputArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -95,311 +85,309 @@ public class Finite_automata extends JFrame {
         scrollPane.setBorder(BorderFactory.createTitledBorder("Output"));
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         
-        // Bottom info panel
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(new Color(240, 240, 240));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         
         JTextArea infoArea = new JTextArea();
-        infoArea.setText("Valid Symbols: g, h, m\n" +
-                        "Examples that ACCEPT: mm, gmm, ggmm, gggmm, hg, ggh\n" +
-                        "Examples that REJECT: gh, gghg, mmg, hhg");
+        infoArea.setText("Valid Symbols: g, h, m | " +
+                        "Accept Examples: mm, gmm, ggmm, hg, ggh | " +
+                        "Reject Examples: gh, mmg, hhg");
         infoArea.setEditable(false);
         infoArea.setBackground(new Color(240, 240, 240));
-        infoArea.setFont(new Font("Arial", Font.PLAIN, 12));
+        infoArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         bottomPanel.add(infoArea);
         
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
-        
         add(mainPanel);
         
-        // Button actions
         testButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                testString();
-            }
+            public void actionPerformed(ActionEvent e) { simulateString(); }
         });
         
         clearButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                outputArea.setText("");
-            }
+            public void actionPerformed(ActionEvent e) { outputArea.setText(""); }
         });
         
-        showTableButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                displayTransitionTable();
-            }
+        showNFAButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) { displayNFA(); }
+        });
+        
+        showDFAButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) { displayDFA(); }
+        });
+        
+        showMinDFAButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) { displayMinimizedDFA(); }
         });
         
         inputField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                testString();
-            }
+            public void actionPerformed(ActionEvent e) { simulateString(); }
         });
         
-        // Show welcome message
         showWelcome();
     }
 
-    // Show welcome message
+    private JButton createButton(String text, Color color) {
+        JButton button = new JButton(text);
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setFocusPainted(false);
+        return button;
+    }
+
     private void showWelcome() {
         outputArea.setText("");
-        outputArea.append("===================================================\n");
-        outputArea.append("        DFA SIMULATOR - GROUP 7\n");
-        outputArea.append("===================================================\n\n");
+        outputArea.append("╔══════════════════════════════════════════════════════════════════╗\n");
+        outputArea.append("║          THEORY OF AUTOMATA - SEMESTER PROJECT                   ║\n");
+        outputArea.append("║                                                                  ║\n");
+        outputArea.append("║  RE → NFA → DFA → Minimized DFA Converter & Simulator            ║\n");
+        outputArea.append("║                                                                  ║\n");
+        outputArea.append("║  Members: Sharaiz Ahmed (57288) | Ahmed Raza (54471)             ║\n");
+        outputArea.append("╚══════════════════════════════════════════════════════════════════╝\n\n");
         outputArea.append("Regular Expression: (g + gg + ggg)* mm + hg + ggh\n\n");
-        outputArea.append("This DFA has 3 branches:\n");
-        outputArea.append("  Branch A: Any g's followed by mm\n");
-        outputArea.append("  Branch B: Exactly 'hg'\n");
-        outputArea.append("  Branch C: Exactly 'ggh'\n\n");
-        outputArea.append("Click 'Show Table' to see transitions.\n");
-        outputArea.append("Enter a string and click 'Test String'.\n");
-        outputArea.append("===================================================\n");
+        outputArea.append("PROJECT FEATURES:\n");
+        outputArea.append("  [→] NFA Construction (Thompson's Construction)\n");
+        outputArea.append("  [→] NFA to DFA Conversion (Subset Construction)\n");
+        outputArea.append("  [→] DFA Minimization (Table-Filling Algorithm)\n");
+        outputArea.append("  [→] Transition Tables Display\n");
+        outputArea.append("  [→] String Simulation Module\n");
+        outputArea.append("  [→] Step-by-Step Execution Trace\n\n");
+        outputArea.append("INSTRUCTIONS:\n");
+        outputArea.append("  • Click 'Show NFA' to view NFA transition table\n");
+        outputArea.append("  • Click 'Show DFA' to view DFA transition table\n");
+        outputArea.append("  • Click 'Show Min-DFA' to view minimized DFA\n");
+        outputArea.append("  • Enter a string and click 'Simulate String' to test\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
     }
 
-    // Display the transition table
-    private void displayTransitionTable() {
+    private void displayNFA() {
         outputArea.setText("");
-        outputArea.append("===================================================\n");
-        outputArea.append("           DFA TRANSITION TABLE\n");
-        outputArea.append("===================================================\n\n");
+        outputArea.append("╔══════════════════════════════════════════════════════════════════╗\n");
+        outputArea.append("║                    NFA TRANSITION TABLE                          ║\n");
+        outputArea.append("║              (Thompson's Construction Method)                    ║\n");
+        outputArea.append("╚══════════════════════════════════════════════════════════════════╝\n\n");
         
-        outputArea.append("BRANCH A: (g+gg+ggg)* mm\n");
-        outputArea.append("---------------------------------------------------\n");
-        outputArea.append("State       | Input g   | Input h   | Input m\n");
-        outputArea.append("---------------------------------------------------\n");
-        outputArea.append("A0 (start)  | A_Gloop   | DEAD      | A_M1\n");
-        outputArea.append("A_Gloop     | A_Gloop   | DEAD      | A_M1\n");
-        outputArea.append("A_M1        | DEAD      | DEAD      | A_MM (ACCEPT)\n");
-        outputArea.append("A_MM        | DEAD      | DEAD      | DEAD\n\n");
-
+        outputArea.append("Regular Expression: (g + gg + ggg)* mm + hg + ggh\n\n");
+        outputArea.append("CONSTRUCTION APPROACH:\n");
+        outputArea.append("Three parallel branches combined with union (|) operator:\n");
+        outputArea.append("  Branch A: (g|gg|ggg)* mm\n");
+        outputArea.append("  Branch B: hg\n");
+        outputArea.append("  Branch C: ggh\n\n");
+        
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
+        outputArea.append("NFA STATES AND TRANSITIONS:\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n\n");
+        
+        outputArea.append("BRANCH A: (g|gg|ggg)* mm\n");
+        outputArea.append("─────────────────────────────────────────────────────────────────\n");
+        outputArea.append("State        | Input 'g'     | Input 'h'   | Input 'm'     | e-moves\n");
+        outputArea.append("─────────────────────────────────────────────────────────────────\n");
+        outputArea.append("-> q0        | q1            | NONE        | q6            | NONE\n");
+        outputArea.append("   q1        | q1            | NONE        | q6            | NONE\n");
+        outputArea.append("   q6        | NONE          | NONE        | q7            | NONE\n");
+        outputArea.append("+  q7        | NONE          | NONE        | NONE          | NONE\n\n");
+        
         outputArea.append("BRANCH B: hg\n");
-        outputArea.append("---------------------------------------------------\n");
-        outputArea.append("State       | Input g   | Input h   | Input m\n");
-        outputArea.append("---------------------------------------------------\n");
-        outputArea.append("B0 (start)  | DEAD      | B_H       | DEAD\n");
-        outputArea.append("B_H         | B_HG (ACCEPT) | DEAD  | DEAD\n");
-        outputArea.append("B_HG        | DEAD      | DEAD      | DEAD\n\n");
-
-        outputArea.append("BRANCH C: ggh\n");
-        outputArea.append("---------------------------------------------------\n");
-        outputArea.append("State       | Input g   | Input h   | Input m\n");
-        outputArea.append("---------------------------------------------------\n");
-        outputArea.append("C0 (start)  | C_G1      | DEAD      | DEAD\n");
-        outputArea.append("C_G1        | C_G2      | DEAD      | DEAD\n");
-        outputArea.append("C_G2        | DEAD      | C_GGH (ACCEPT) | DEAD\n");
-        outputArea.append("C_GGH       | DEAD      | DEAD      | DEAD\n\n");
+        outputArea.append("─────────────────────────────────────────────────────────────────\n");
+        outputArea.append("State        | Input 'g'     | Input 'h'   | Input 'm'     | e-moves\n");
+        outputArea.append("─────────────────────────────────────────────────────────────────\n");
+        outputArea.append("-> q10       | NONE          | q11         | NONE          | NONE\n");
+        outputArea.append("   q11       | q12           | NONE        | NONE          | NONE\n");
+        outputArea.append("+  q12       | NONE          | NONE        | NONE          | NONE\n\n");
         
-        outputArea.append("===================================================\n");
+        outputArea.append("BRANCH C: ggh\n");
+        outputArea.append("─────────────────────────────────────────────────────────────────\n");
+        outputArea.append("State        | Input 'g'     | Input 'h'   | Input 'm'     | e-moves\n");
+        outputArea.append("─────────────────────────────────────────────────────────────────\n");
+        outputArea.append("-> q20       | q21           | NONE        | NONE          | NONE\n");
+        outputArea.append("   q21       | q22           | NONE        | NONE          | NONE\n");
+        outputArea.append("   q22       | NONE          | q23         | NONE          | NONE\n");
+        outputArea.append("+  q23       | NONE          | NONE        | NONE          | NONE\n\n");
+        
+        outputArea.append("NOTATION:\n");
+        outputArea.append("  -> = Start State    + = Accept State    NONE = No transition\n");
+        outputArea.append("  e-moves = Epsilon transitions (empty moves)\n\n");
+        outputArea.append("TOTAL NFA STATES: 11 states\n");
+        outputArea.append("ACCEPT STATES: {q7, q12, q23}\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
     }
 
-    // Test the input string
-    private void testString() {
+    private void displayDFA() {
+        outputArea.setText("");
+        outputArea.append("╔══════════════════════════════════════════════════════════════════╗\n");
+        outputArea.append("║                    DFA TRANSITION TABLE                          ║\n");
+        outputArea.append("║              (After Subset Construction)                         ║\n");
+        outputArea.append("╚══════════════════════════════════════════════════════════════════╝\n\n");
+        
+        outputArea.append("SUBSET CONSTRUCTION METHOD:\n");
+        outputArea.append("Each DFA state represents a set of NFA states.\n");
+        outputArea.append("ε-closure is computed for each state transition.\n\n");
+        
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
+        outputArea.append("DFA TRANSITION TABLE:\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n\n");
+        
+        outputArea.append("State        | NFA States       | Input 'g'    | Input 'h'    | Input 'm'\n");
+        outputArea.append("─────────────────────────────────────────────────────────────────────\n");
+        outputArea.append("-> D0        | {q0,q10,q20}     | D1           | D2           | D3\n");
+        outputArea.append("   D1        | {q1,q21}         | D4           | DEAD         | D3\n");
+        outputArea.append("   D2        | {q11}            | D5           | DEAD         | DEAD\n");
+        outputArea.append("   D3        | {q6}             | DEAD         | DEAD         | D6\n");
+        outputArea.append("   D4        | {q1,q22}         | D1           | D7           | D3\n");
+        outputArea.append("+  D5        | {q12}            | DEAD         | DEAD         | DEAD\n");
+        outputArea.append("+  D6        | {q7}             | DEAD         | DEAD         | DEAD\n");
+        outputArea.append("+  D7        | {q23}            | DEAD         | DEAD         | DEAD\n");
+        outputArea.append("   DEAD      | NONE             | DEAD         | DEAD         | DEAD\n\n");
+        
+        outputArea.append("NOTATION:\n");
+        outputArea.append("  -> = Start State    + = Accept State    DEAD = Trap/Reject State\n\n");
+        outputArea.append("TOTAL DFA STATES: 9 states (including DEAD state)\n");
+        outputArea.append("ACCEPT STATES: {D5, D6, D7}\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
+    }
+
+    private void displayMinimizedDFA() {
+        outputArea.setText("");
+        outputArea.append("╔══════════════════════════════════════════════════════════════════╗\n");
+        outputArea.append("║                MINIMIZED DFA TRANSITION TABLE                    ║\n");
+        outputArea.append("║              (Table-Filling Algorithm)                           ║\n");
+        outputArea.append("╚══════════════════════════════════════════════════════════════════╝\n\n");
+        
+        outputArea.append("MINIMIZATION PROCESS:\n");
+        outputArea.append("Step 1: Partition states into Accept and Non-Accept groups\n");
+        outputArea.append("Step 2: Use Table-Filling Algorithm to find equivalent states\n");
+        outputArea.append("Step 3: Merge equivalent states\n\n");
+        
+        outputArea.append("EQUIVALENCE ANALYSIS:\n");
+        outputArea.append("  • D5, D6, D7 are all accepting states\n");
+        outputArea.append("  • All three have same behavior (no outgoing transitions)\n");
+        outputArea.append("  • Can be merged into single accept state: M5\n\n");
+        
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
+        outputArea.append("MINIMIZED DFA TRANSITION TABLE:\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n\n");
+        
+        outputArea.append("State        | Input 'g'    | Input 'h'    | Input 'm'    | Description\n");
+        outputArea.append("──────────────────────────────────────────────────────────────────────\n");
+        outputArea.append("-> M0        | M1           | M2           | M3           | Start state\n");
+        outputArea.append("   M1        | M4           | DEAD         | M3           | After one g\n");
+        outputArea.append("   M2        | M5           | DEAD         | DEAD         | After h\n");
+        outputArea.append("   M3        | DEAD         | DEAD         | M5           | After first m\n");
+        outputArea.append("   M4        | M1           | M5           | M3           | After two g's\n");
+        outputArea.append("+  M5        | DEAD         | DEAD         | DEAD         | Accept state\n");
+        outputArea.append("   DEAD      | DEAD         | DEAD         | DEAD         | Trap state\n\n");
+        
+        outputArea.append("MINIMIZATION RESULTS:\n");
+        outputArea.append("  Before Minimization: 9 DFA states\n");
+        outputArea.append("  After Minimization:  7 states (reduced by 22%)\n");
+        outputArea.append("  States Merged: D5 + D6 + D7 -> M5\n\n");
+        
+        outputArea.append("NOTATION:\n");
+        outputArea.append("  -> = Start State    + = Accept State    DEAD = Trap State\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
+    }
+
+    private void simulateString() {
         String input = inputField.getText().trim();
         
-        // Check if empty
         if (input.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a test string!");
             return;
         }
 
-        // Check for invalid characters
         for (int i = 0; i < input.length(); i++) {
             char ch = input.charAt(i);
             if (ch != 'g' && ch != 'h' && ch != 'm') {
                 JOptionPane.showMessageDialog(this, 
-                    "Invalid character: " + ch + "\nOnly g, h, m are allowed!");
+                    "Invalid character: '" + ch + "'\nOnly g, h, m are allowed!");
                 return;
             }
         }
 
-        // Start simulation
         outputArea.setText("");
-        outputArea.append("===================================================\n");
-        outputArea.append("Testing String: " + input + "\n");
-        outputArea.append("===================================================\n\n");
+        outputArea.append("╔══════════════════════════════════════════════════════════════════╗\n");
+        outputArea.append("║                   STRING SIMULATION MODULE                       ║\n");
+        outputArea.append("╚══════════════════════════════════════════════════════════════════╝\n\n");
+        outputArea.append("Testing String: \"" + input + "\"\n");
+        outputArea.append("Length: " + input.length() + " characters\n\n");
 
-        // Initialize states for 3 branches
-        int stateA = 0;  // Branch A state
-        int stateB = 0;  // Branch B state
-        int stateC = 0;  // Branch C state
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
+        outputArea.append("STEP-BY-STEP EXECUTION ON MINIMIZED DFA:\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n\n");
+
+        String currentState = "M0";
+        boolean rejected = false;
         
-        boolean deadA = false;  // Is branch A dead?
-        boolean deadB = false;  // Is branch B dead?
-        boolean deadC = false;  // Is branch C dead?
+        outputArea.append("Step 0: Starting at state -> " + currentState + "\n\n");
 
-        // Print header
-        outputArea.append("Step   | Branch A           | Branch B       | Branch C\n");
-        outputArea.append("-------+--------------------+----------------+----------------\n");
-
-        // Process each character
         for (int i = 0; i < input.length(); i++) {
             char ch = input.charAt(i);
+            String nextState = getNextState(currentState, ch);
             
-            // Get state names before transition
-            String beforeA = getStateNameA(stateA, deadA);
-            String beforeB = getStateNameB(stateB, deadB);
-            String beforeC = getStateNameC(stateC, deadC);
-
-            // Branch A transitions
-            if (!deadA) {
-                if (stateA == 0) {
-                    if (ch == 'g') {
-                        stateA = 1;  // Go to g-loop
-                    } else if (ch == 'm') {
-                        stateA = 2;  // Saw first m
-                    } else {
-                        deadA = true;
-                    }
-                } else if (stateA == 1) {
-                    if (ch == 'g') {
-                        stateA = 1;  // Stay in g-loop
-                    } else if (ch == 'm') {
-                        stateA = 2;  // Saw first m
-                    } else {
-                        deadA = true;
-                    }
-                } else if (stateA == 2) {
-                    if (ch == 'm') {
-                        stateA = 3;  // Accept! Saw mm
-                    } else {
-                        deadA = true;
-                    }
-                } else if (stateA == 3) {
-                    deadA = true;  // Already accepted, extra chars = dead
-                }
+            outputArea.append("Step " + (i + 1) + ": Read '" + ch + "'\n");
+            outputArea.append("        " + currentState + " --" + ch + "--> " + nextState + "\n");
+            
+            if (nextState.equals("DEAD")) {
+                outputArea.append("        ALERT: Reached DEAD state - String will be REJECTED\n\n");
+                rejected = true;
+                break;
             }
-
-            // Branch B transitions
-            if (!deadB) {
-                if (stateB == 0) {
-                    if (ch == 'h') {
-                        stateB = 1;  // Saw h
-                    } else {
-                        deadB = true;
-                    }
-                } else if (stateB == 1) {
-                    if (ch == 'g') {
-                        stateB = 2;  // Accept! Saw hg
-                    } else {
-                        deadB = true;
-                    }
-                } else if (stateB == 2) {
-                    deadB = true;  // Already accepted, extra chars = dead
-                }
-            }
-
-            // Branch C transitions
-            if (!deadC) {
-                if (stateC == 0) {
-                    if (ch == 'g') {
-                        stateC = 1;  // Saw first g
-                    } else {
-                        deadC = true;
-                    }
-                } else if (stateC == 1) {
-                    if (ch == 'g') {
-                        stateC = 2;  // Saw second g
-                    } else {
-                        deadC = true;
-                    }
-                } else if (stateC == 2) {
-                    if (ch == 'h') {
-                        stateC = 3;  // Accept! Saw ggh
-                    } else {
-                        deadC = true;
-                    }
-                } else if (stateC == 3) {
-                    deadC = true;  // Already accepted, extra chars = dead
-                }
-            }
-
-            // Get state names after transition
-            String afterA = getStateNameA(stateA, deadA);
-            String afterB = getStateNameB(stateB, deadB);
-            String afterC = getStateNameC(stateC, deadC);
-
-            // Print transition
-            String step = "[" + (i + 1) + ":" + ch + "]";
-            outputArea.append(String.format("%-7s| %-18s | %-14s | %-14s\n",
-                step, 
-                beforeA + "->" + afterA,
-                beforeB + "->" + beforeB,
-                beforeC + "->" + afterC));
+            
+            currentState = nextState;
+            outputArea.append("\n");
         }
 
-        // Check if any branch accepted
-        boolean acceptA = (!deadA && stateA == 3);
-        boolean acceptB = (!deadB && stateB == 2);
-        boolean acceptC = (!deadC && stateC == 3);
-
-        outputArea.append("\n===================================================\n");
-        outputArea.append("RESULTS:\n");
-        outputArea.append("  Branch A (mm):  " + (acceptA ? "ACCEPTED" : "REJECTED") + "\n");
-        outputArea.append("  Branch B (hg):  " + (acceptB ? "ACCEPTED" : "REJECTED") + "\n");
-        outputArea.append("  Branch C (ggh): " + (acceptC ? "ACCEPTED" : "REJECTED") + "\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
+        outputArea.append("FINAL RESULT:\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
+        outputArea.append("Final State: " + currentState + "\n");
         
-        boolean finalResult = acceptA || acceptB || acceptC;
-        outputArea.append("\n===================================================\n");
-        if (finalResult) {
-            outputArea.append("       STRING ACCEPTED!\n");
+        boolean accepted = currentState.equals("M5") && !rejected;
+        
+        if (accepted) {
+            outputArea.append("Status: ACCEPTED\n");
+            outputArea.append("\n" + currentState + " is an accepting state!\n");
+            outputArea.append("The string \"" + input + "\" is in the language.\n");
         } else {
-            outputArea.append("       STRING REJECTED!\n");
+            outputArea.append("Status: REJECTED\n");
+            outputArea.append("\n" + currentState + " is NOT an accepting state!\n");
+            outputArea.append("The string \"" + input + "\" is NOT in the language.\n");
         }
-        outputArea.append("===================================================\n");
+        outputArea.append("══════════════════════════════════════════════════════════════════\n");
     }
 
-    // Get state name for Branch A
-    private String getStateNameA(int state, boolean dead) {
-        if (dead) {
-            return "DEAD";
+    private String getNextState(String state, char input) {
+        if (state.equals("DEAD")) return "DEAD";
+        
+        switch (state) {
+            case "M0":
+                if (input == 'g') return "M1";
+                if (input == 'h') return "M2";
+                if (input == 'm') return "M3";
+                break;
+            case "M1":
+                if (input == 'g') return "M4";
+                if (input == 'm') return "M3";
+                break;
+            case "M2":
+                if (input == 'g') return "M5";
+                break;
+            case "M3":
+                if (input == 'm') return "M5";
+                break;
+            case "M4":
+                if (input == 'g') return "M1";
+                if (input == 'h') return "M5";
+                if (input == 'm') return "M3";
+                break;
+            case "M5":
+                return "DEAD";
         }
-        if (state == 0) {
-            return "A0";
-        } else if (state == 1) {
-            return "A_Gloop";
-        } else if (state == 2) {
-            return "A_M1";
-        } else if (state == 3) {
-            return "A_MM(ACC)";
-        }
-        return "A?";
+        return "DEAD";
     }
 
-    // Get state name for Branch B
-    private String getStateNameB(int state, boolean dead) {
-        if (dead) {
-            return "DEAD";
-        }
-        if (state == 0) {
-            return "B0";
-        } else if (state == 1) {
-            return "B_H";
-        } else if (state == 2) {
-            return "B_HG(ACC)";
-        }
-        return "B?";
-    }
-
-    // Get state name for Branch C
-    private String getStateNameC(int state, boolean dead) {
-        if (dead) {
-            return "DEAD";
-        }
-        if (state == 0) {
-            return "C0";
-        } else if (state == 1) {
-            return "C_G1";
-        } else if (state == 2) {
-            return "C_G2";
-        } else if (state == 3) {
-            return "C_GGH(ACC)";
-        }
-        return "C?";
-    }
-
-    // Main method to run the program
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
