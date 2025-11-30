@@ -3,19 +3,22 @@ package classtask.finite_automata;
 import java.util.*;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import javax.imageio.ImageIO;
 
 public class Finite_automata extends JFrame {
     
     private JTextField inputField;
     private JTextArea outputArea;
     private JButton testButton, clearButton, showNFAButton, showDFAButton, showMinDFAButton;
+    private JButton showNFADiagramButton, showDFADiagramButton, showMinDFADiagramButton;
     
     private final String REGEX = "(g + gg + ggg)* mm + hg + ggh";
     
     public Finite_automata() {
         setTitle("RE → NFA → DFA → Min-DFA Simulator");
-        setSize(1000, 700);
+        setSize(1200, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setupGUI();
@@ -60,17 +63,26 @@ public class Finite_automata extends JFrame {
         inputField.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         inputPanel.add(inputField);
         
+        // Original buttons (TEXT OUTPUT ONLY)
         testButton = createButton("Test String", new Color(39, 174, 96));
         showNFAButton = createButton("Show NFA", new Color(52, 152, 219));
         showDFAButton = createButton("Show DFA", new Color(155, 89, 182));
         showMinDFAButton = createButton("Show Min-DFA", new Color(230, 126, 34));
         clearButton = createButton("Clear", new Color(231, 76, 60));
         
+        // NEW Diagram buttons
+        showNFADiagramButton = createButton(" NFA Diagram", new Color(46, 204, 113));
+        showDFADiagramButton = createButton(" DFA Diagram", new Color(52, 152, 219));
+        showMinDFADiagramButton = createButton(" Min-DFA Diagram", new Color(155, 89, 182));
+        
         inputPanel.add(testButton);
         inputPanel.add(showNFAButton);
         inputPanel.add(showDFAButton);
         inputPanel.add(showMinDFAButton);
         inputPanel.add(clearButton);
+        inputPanel.add(showNFADiagramButton);
+        inputPanel.add(showDFADiagramButton);
+        inputPanel.add(showMinDFADiagramButton);
         
         topPanel.add(inputPanel, BorderLayout.CENTER);
         mainPanel.add(topPanel, BorderLayout.NORTH);
@@ -92,7 +104,8 @@ public class Finite_automata extends JFrame {
         JTextArea infoArea = new JTextArea();
         infoArea.setText("Valid Symbols: g, h, m | " +
                         "Accept Examples: mm, gmm, ggmm, hg, ggh | " +
-                        "Reject Examples: gh, mmg, hhg");
+                        "Reject Examples: gh, mmg, hhg" +
+                        "\n Use Diagram buttons for visual representations | Text buttons show tables only");
         infoArea.setEditable(false);
         infoArea.setBackground(new Color(240, 240, 240));
         infoArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -101,29 +114,18 @@ public class Finite_automata extends JFrame {
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         add(mainPanel);
         
-        testButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) { simulateString(); }
-        });
+        // Action Listeners - ORIGINAL BUTTONS (TEXT ONLY)
+        testButton.addActionListener(e -> simulateString());
+        clearButton.addActionListener(e -> outputArea.setText(""));
+        showNFAButton.addActionListener(e -> displayNFA());           // TEXT ONLY
+        showDFAButton.addActionListener(e -> displayDFA());           // TEXT ONLY  
+        showMinDFAButton.addActionListener(e -> displayMinimizedDFA()); // TEXT ONLY
+        inputField.addActionListener(e -> simulateString());
         
-        clearButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) { outputArea.setText(""); }
-        });
-        
-        showNFAButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) { displayNFA(); }
-        });
-        
-        showDFAButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) { displayDFA(); }
-        });
-        
-        showMinDFAButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) { displayMinimizedDFA(); }
-        });
-        
-        inputField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) { simulateString(); }
-        });
+        // NEW DIAGRAM BUTTONS
+        showNFADiagramButton.addActionListener(e -> showNFADiagram());
+        showDFADiagramButton.addActionListener(e -> showDFADiagram());
+        showMinDFADiagramButton.addActionListener(e -> showMinDFADiagram());
         
         showWelcome();
     }
@@ -132,8 +134,9 @@ public class Finite_automata extends JFrame {
         JButton button = new JButton(text);
         button.setBackground(color);
         button.setForeground(Color.WHITE);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 12));
         button.setFocusPainted(false);
+        button.setMargin(new Insets(5, 10, 5, 10));
         return button;
     }
 
@@ -151,17 +154,18 @@ public class Finite_automata extends JFrame {
         outputArea.append("  [→] NFA Construction (Thompson's Construction)\n");
         outputArea.append("  [→] NFA to DFA Conversion (Subset Construction)\n");
         outputArea.append("  [→] DFA Minimization (Table-Filling Algorithm)\n");
-        outputArea.append("  [→] Transition Tables Display\n");
+        outputArea.append("  [→] Transition Tables Display (TEXT buttons)\n");
+        outputArea.append("  [→] Diagram Visualization (DIAGRAM buttons)\n");
         outputArea.append("  [→] String Simulation Module\n");
         outputArea.append("  [→] Step-by-Step Execution Trace\n\n");
         outputArea.append("INSTRUCTIONS:\n");
-        outputArea.append("  • Click 'Show NFA' to view NFA transition table\n");
-        outputArea.append("  • Click 'Show DFA' to view DFA transition table\n");
-        outputArea.append("  • Click 'Show Min-DFA' to view minimized DFA\n");
-        outputArea.append("  • Enter a string and click 'Simulate String' to test\n");
+        outputArea.append("  • TEXT buttons: Show NFA/DFA/Min-DFA → View transition tables\n");
+        outputArea.append("  • DIAGRAM buttons: NFA/DFA/Min-DFA Diagram → View Graphviz visuals\n");
+        outputArea.append("  • Test String → Simulate input on Min-DFA\n");
         outputArea.append("══════════════════════════════════════════════════════════════════\n");
     }
 
+    // ========== TEXT DISPLAY METHODS (UNCHANGED) ==========
     private void displayNFA() {
         outputArea.setText("");
         outputArea.append("╔══════════════════════════════════════════════════════════════════╗\n");
@@ -289,6 +293,7 @@ public class Finite_automata extends JFrame {
         outputArea.append("══════════════════════════════════════════════════════════════════\n");
     }
 
+    // ========== SIMULATION (UNCHANGED) ==========
     private void simulateString() {
         String input = inputField.getText().trim();
         
@@ -388,12 +393,212 @@ public class Finite_automata extends JFrame {
         return "DEAD";
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                Finite_automata gui = new Finite_automata();
-                gui.setVisible(true);
+    // ========== DIAGRAM GENERATION METHODS ==========
+    
+    private Map<String, Map<String, Set<String>>> getNFATransitions() {
+        Map<String, Map<String, Set<String>>> nfa = new HashMap<>();
+        
+        // Branch A: (g|gg|ggg)* mm
+        nfa.put("q0", Map.of("g", Set.of("q1"), "m", Set.of("q6")));
+        nfa.put("q1", Map.of("g", Set.of("q1"), "m", Set.of("q6")));
+        nfa.put("q6", Map.of("m", Set.of("q7")));
+        nfa.put("q7", Map.of());
+        
+        // Branch B: hg
+        nfa.put("q10", Map.of("h", Set.of("q11")));
+        nfa.put("q11", Map.of("g", Set.of("q12")));
+        nfa.put("q12", Map.of());
+        
+        // Branch C: ggh
+        nfa.put("q20", Map.of("g", Set.of("q21")));
+        nfa.put("q21", Map.of("g", Set.of("q22")));
+        nfa.put("q22", Map.of("h", Set.of("q23")));
+        nfa.put("q23", Map.of());
+        
+        return nfa;
+    }
+
+    private String generateNFADOT(Map<String, Map<String, Set<String>>> transitions,
+                                 String startState, Set<String> finalStates) {
+        StringBuilder dot = new StringBuilder();
+        dot.append("digraph NFA {\n");
+        dot.append("  rankdir=LR;\n");
+        dot.append("  node [shape=circle, fontsize=12, fixedsize=true, width=0.8];\n");
+        dot.append("  start [shape=point, color=green];\n");
+        dot.append(startState + " [color=green, style=filled, fillcolor=lightgreen];\n");
+
+        for (String fs : finalStates) {
+            dot.append(fs + " [peripheries=2];\n");
+        }
+
+        dot.append("  start -> q0 [color=green];\n");
+        dot.append("  start -> q10 [color=green];\n");
+        dot.append("  start -> q20 [color=green];\n");
+
+        for (String from : transitions.keySet()) {
+            Map<String, Set<String>> edges = transitions.get(from);
+            for (String input : edges.keySet()) {
+                Set<String> targets = edges.get(input);
+                for (String to : targets) {
+                    dot.append(String.format("  %s -> %s [label=\"%s\"];\n", from, to, input));
+                }
             }
+        }
+
+        dot.append("}\n");
+        return dot.toString();
+    }
+
+    private Map<String, Map<Character, String>> getDFATransitions() {
+        Map<String, Map<Character, String>> dfaTransitions = new HashMap<>();
+        dfaTransitions.put("D0", Map.of('g', "D1", 'h', "D2", 'm', "D3"));
+        dfaTransitions.put("D1", Map.of('g', "D4", 'h', "DEAD", 'm', "D3"));
+        dfaTransitions.put("D2", Map.of('g', "D5", 'h', "DEAD", 'm', "DEAD"));
+        dfaTransitions.put("D3", Map.of('g', "DEAD", 'h', "DEAD", 'm', "D6"));
+        dfaTransitions.put("D4", Map.of('g', "D1", 'h', "D7", 'm', "D3"));
+        dfaTransitions.put("D5", Map.of('g', "DEAD", 'h', "DEAD", 'm', "DEAD"));
+        dfaTransitions.put("D6", Map.of('g', "DEAD", 'h', "DEAD", 'm', "DEAD"));
+        dfaTransitions.put("D7", Map.of('g', "DEAD", 'h', "DEAD", 'm', "DEAD"));
+        dfaTransitions.put("DEAD", Map.of('g', "DEAD", 'h', "DEAD", 'm', "DEAD"));
+        return dfaTransitions;
+    }
+
+    private Set<String> getDFAFinalStates() {
+        return Set.of("D5", "D6", "D7");
+    }
+
+    private String getDFAStartState() {
+        return "D0";
+    }
+
+    private Map<String, Map<Character, String>> getMinDFATransitions() {
+        Map<String, Map<Character, String>> minDfa = new HashMap<>();
+        minDfa.put("M0", Map.of('g', "M1", 'h', "M2", 'm', "M3"));
+        minDfa.put("M1", Map.of('g', "M4", 'h', "DEAD", 'm', "M3"));
+        minDfa.put("M2", Map.of('g', "M5", 'h', "DEAD", 'm', "DEAD"));
+        minDfa.put("M3", Map.of('g', "DEAD", 'h', "DEAD", 'm', "M5"));
+        minDfa.put("M4", Map.of('g', "M1", 'h', "M5", 'm', "M3"));
+        minDfa.put("M5", Map.of('g', "DEAD", 'h', "DEAD", 'm', "DEAD"));
+        minDfa.put("DEAD", Map.of('g', "DEAD", 'h', "DEAD", 'm', "DEAD"));
+        return minDfa;
+    }
+
+    private Set<String> getMinDFAFinalStates() {
+        return Set.of("M5");
+    }
+
+    private String getMinDFAStartState() {
+        return "M0";
+    }
+
+    private String generateDOT(Map<String, Map<Character, String>> transitions,
+                           String startState, Set<String> finalStates, String title) {
+    StringBuilder dot = new StringBuilder();
+    
+    dot.append("digraph Automaton {\n");
+    dot.append("  rankdir=LR;\n");
+    dot.append("  node [shape=circle, fontsize=14, fixedsize=true, width=0.9];\n");
+    dot.append("  start [shape=point, color=green];\n");
+    dot.append(startState + " [color=green, style=filled, fillcolor=lightgreen];\n");
+
+    for (String fs : finalStates) {
+        if (!fs.equals(startState)) {
+            dot.append(fs + " [peripheries=2];\n");
+        }
+    }
+
+    dot.append("  start -> " + startState + " [color=green];\n");
+
+    for (String from : transitions.keySet()) {
+        Map<Character, String> edges = transitions.get(from);
+        for (Character input : edges.keySet()) {
+            String to = edges.get(input);
+            dot.append(String.format("  %s -> %s [label=\"%c\"];\n", from, to, input));
+        }
+    }
+
+    // keep title only in label (this can have spaces)
+    dot.append("  label=\"\\n" + title + " - " + REGEX + "\";\n");
+    dot.append("  labelloc=\"t\";\n");
+    dot.append("  fontsize=12;\n");
+    dot.append("}\n");
+    return dot.toString();
+}
+
+
+    private File writeDOTFile(String dotSource, String filename) throws IOException {
+        File dotFile = new File(filename);
+        try (PrintWriter out = new PrintWriter(dotFile)) {
+            out.print(dotSource);
+        }
+        return dotFile;
+    }
+
+    private void generateGraphvizImage(File dotFile, File outputImage) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder("dot", "-Tpng", dotFile.getAbsolutePath(), "-o", outputImage.getAbsolutePath());
+        Process p = pb.start();
+        int exitCode = p.waitFor();
+        if (exitCode != 0) {
+            throw new IOException("Graphviz 'dot' command failed. Please ensure Graphviz is installed and in PATH.");
+        }
+    }
+
+    private void showDiagram(String title, String dotFilename, String imageFilename) {
+    try {
+        File imageFile = new File(imageFilename);
+        
+        
+        String dotSource;
+        if (title.contains("NFA")) {
+            var transitions = getNFATransitions();
+            dotSource = generateNFADOT(transitions, "start", Set.of("q7", "q12", "q23"));
+        } else if (title.contains("DFA") && !title.contains("Minimized")) {
+            var transitions = getDFATransitions();
+            dotSource = generateDOT(transitions, getDFAStartState(), getDFAFinalStates(), title);
+        } else {  // Min-DFA or any other
+            var transitions = getMinDFATransitions();
+            dotSource = generateDOT(transitions, getMinDFAStartState(), getMinDFAFinalStates(), title);
+        }
+        
+        File dotFile = writeDOTFile(dotSource, dotFilename);
+        generateGraphvizImage(dotFile, imageFile);
+
+        BufferedImage img = ImageIO.read(imageFile);
+        ImageIcon icon = new ImageIcon(img);
+
+        JFrame frame = new JFrame(title + " - Generated by Graphviz");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        JLabel label = new JLabel(icon);
+        frame.getContentPane().add(new JScrollPane(label), BorderLayout.CENTER);
+        frame.pack();
+        frame.setLocationRelativeTo(this);
+        frame.setSize(900, 700);
+        frame.setVisible(true);
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, 
+            title + " Error:\n" + e.getMessage() + 
+            "\n\nTo fix:\n1. Install Graphviz (https://graphviz.org/download/)\n2. Add 'dot' to system PATH",
+            "Graphviz Required", JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
+    }
+}
+
+    private void showNFADiagram() {
+        showDiagram("NFA", "nfa.dot", "nfa.png");
+    }
+
+    private void showDFADiagram() {
+        showDiagram("DFA", "dfa.dot", "dfa.png");
+    }
+
+    private void showMinDFADiagram() {
+        showDiagram("Minimized DFA", "min_dfa.dot", "min_dfa.png");
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new Finite_automata().setVisible(true);
         });
     }
 }

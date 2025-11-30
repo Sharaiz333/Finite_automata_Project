@@ -1,0 +1,32 @@
+digraph Automaton {
+  rankdir=LR;
+  node [shape=circle, fontsize=14, fixedsize=true, width=0.9];
+  start [shape=point, color=green];
+M0 [color=green, style=filled, fillcolor=lightgreen];
+M5 [peripheries=2];
+  start -> M0 [color=green];
+  M0 -> M3 [label="m"];
+  M0 -> M1 [label="g"];
+  M0 -> M2 [label="h"];
+  M1 -> M3 [label="m"];
+  M1 -> M4 [label="g"];
+  M1 -> DEAD [label="h"];
+  M2 -> DEAD [label="m"];
+  M2 -> M5 [label="g"];
+  M2 -> DEAD [label="h"];
+  M3 -> M5 [label="m"];
+  M3 -> DEAD [label="g"];
+  M3 -> DEAD [label="h"];
+  M4 -> M3 [label="m"];
+  M4 -> M1 [label="g"];
+  M4 -> M5 [label="h"];
+  M5 -> DEAD [label="m"];
+  M5 -> DEAD [label="g"];
+  M5 -> DEAD [label="h"];
+  DEAD -> DEAD [label="m"];
+  DEAD -> DEAD [label="g"];
+  DEAD -> DEAD [label="h"];
+  label="\nMinimized DFA - (g + gg + ggg)* mm + hg + ggh";
+  labelloc="t";
+  fontsize=12;
+}
