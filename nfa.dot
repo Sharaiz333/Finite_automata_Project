@@ -3,20 +3,20 @@ digraph NFA {
   node [shape=circle, fontsize=12, fixedsize=true, width=0.8];
   start [shape=point, color=green];
 start [color=green, style=filled, fillcolor=lightgreen];
+q7 [peripheries=2];
 q23 [peripheries=2];
 q12 [peripheries=2];
-q7 [peripheries=2];
   start -> q0 [color=green];
   start -> q10 [color=green];
   start -> q20 [color=green];
-  q1 -> q6 [label="m"];
   q1 -> q1 [label="g"];
+  q1 -> q6 [label="m"];
   q11 -> q12 [label="g"];
   q22 -> q23 [label="h"];
   q10 -> q11 [label="h"];
   q21 -> q22 [label="g"];
   q6 -> q7 [label="m"];
   q20 -> q21 [label="g"];
-  q0 -> q6 [label="m"];
   q0 -> q1 [label="g"];
+  q0 -> q6 [label="m"];
 }

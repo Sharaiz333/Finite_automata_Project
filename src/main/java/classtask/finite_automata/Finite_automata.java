@@ -63,17 +63,14 @@ public class Finite_automata extends JFrame {
         inputField.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         inputPanel.add(inputField);
         
-        // Original buttons (TEXT OUTPUT ONLY)
-        testButton = createButton("Test String", new Color(39, 174, 96));
-        showNFAButton = createButton("Show NFA", new Color(52, 152, 219));
-        showDFAButton = createButton("Show DFA", new Color(155, 89, 182));
+        testButton = createButton("Test String", new Color(46, 204, 113));
+        showNFAButton = createButton("Show NFA", new Color(155, 89, 182));
+        showDFAButton = createButton("Show DFA", new Color(52, 152, 219));
         showMinDFAButton = createButton("Show Min-DFA", new Color(230, 126, 34));
         clearButton = createButton("Clear", new Color(231, 76, 60));
-        
-        // NEW Diagram buttons
-        showNFADiagramButton = createButton(" NFA Diagram", new Color(46, 204, 113));
+        showNFADiagramButton = createButton(" NFA Diagram", new Color(155, 89, 182));
         showDFADiagramButton = createButton(" DFA Diagram", new Color(52, 152, 219));
-        showMinDFADiagramButton = createButton(" Min-DFA Diagram", new Color(155, 89, 182));
+        showMinDFADiagramButton = createButton(" Min-DFA Diagram", new Color(230, 126, 34));
         
         inputPanel.add(testButton);
         inputPanel.add(showNFAButton);
@@ -114,15 +111,12 @@ public class Finite_automata extends JFrame {
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         add(mainPanel);
         
-        // Action Listeners - ORIGINAL BUTTONS (TEXT ONLY)
         testButton.addActionListener(e -> simulateString());
         clearButton.addActionListener(e -> outputArea.setText(""));
-        showNFAButton.addActionListener(e -> displayNFA());           // TEXT ONLY
-        showDFAButton.addActionListener(e -> displayDFA());           // TEXT ONLY  
-        showMinDFAButton.addActionListener(e -> displayMinimizedDFA()); // TEXT ONLY
+        showNFAButton.addActionListener(e -> displayNFA());           
+        showDFAButton.addActionListener(e -> displayDFA());           
+        showMinDFAButton.addActionListener(e -> displayMinimizedDFA()); 
         inputField.addActionListener(e -> simulateString());
-        
-        // NEW DIAGRAM BUTTONS
         showNFADiagramButton.addActionListener(e -> showNFADiagram());
         showDFADiagramButton.addActionListener(e -> showDFADiagram());
         showMinDFADiagramButton.addActionListener(e -> showMinDFADiagram());
@@ -165,7 +159,6 @@ public class Finite_automata extends JFrame {
         outputArea.append("══════════════════════════════════════════════════════════════════\n");
     }
 
-    // ========== TEXT DISPLAY METHODS (UNCHANGED) ==========
     private void displayNFA() {
         outputArea.setText("");
         outputArea.append("╔══════════════════════════════════════════════════════════════════╗\n");
@@ -293,7 +286,6 @@ public class Finite_automata extends JFrame {
         outputArea.append("══════════════════════════════════════════════════════════════════\n");
     }
 
-    // ========== SIMULATION (UNCHANGED) ==========
     private void simulateString() {
         String input = inputField.getText().trim();
         
@@ -393,8 +385,6 @@ public class Finite_automata extends JFrame {
         return "DEAD";
     }
 
-    // ========== DIAGRAM GENERATION METHODS ==========
-    
     private Map<String, Map<String, Set<String>>> getNFATransitions() {
         Map<String, Map<String, Set<String>>> nfa = new HashMap<>();
         
@@ -517,7 +507,6 @@ public class Finite_automata extends JFrame {
         }
     }
 
-    // keep title only in label (this can have spaces)
     dot.append("  label=\"\\n" + title + " - " + REGEX + "\";\n");
     dot.append("  labelloc=\"t\";\n");
     dot.append("  fontsize=12;\n");
@@ -555,7 +544,7 @@ public class Finite_automata extends JFrame {
         } else if (title.contains("DFA") && !title.contains("Minimized")) {
             var transitions = getDFATransitions();
             dotSource = generateDOT(transitions, getDFAStartState(), getDFAFinalStates(), title);
-        } else {  // Min-DFA or any other
+        } else {  
             var transitions = getMinDFATransitions();
             dotSource = generateDOT(transitions, getMinDFAStartState(), getMinDFAFinalStates(), title);
         }
@@ -597,8 +586,7 @@ public class Finite_automata extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new Finite_automata().setVisible(true);
-        });
-    }
+    Finite_automata fa = new Finite_automata();
+    fa.setVisible(true);
+}
 }
